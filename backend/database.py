@@ -2,7 +2,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 
 load_dotenv()
@@ -80,10 +80,22 @@ async def get_daily_stats(date_str: str) -> Dict:
     result = await collection.aggregate(pipeline).to_list(1)
     return result[0] if result else {}
 
-def load_reference_words() -> List[str]:
+def load_reference_words() -> Tuple[List[str], None]:
     collection = get_words_collection()
-    words = list(collection.find({}, {"_id": 0, "word": 1}).sort("frequency_rank", 1))
-    return [w["word"] for w in words]
+    collection.create_index([("frequency_rank", 1)])
+
+    pipeline = [
+        {"$sort": {"frequency_rank": 1}},
+        {"$project": {"_id": 0, "word": 1}}
+    ]
+    
+    try:
+        cursor = collection.aggregate(pipeline, allowDiskUse=True)
+        words = [doc['word'] for doc in cursor]
+        return words, None
+    except Exception as e:
+        print(f"Error loading reference words: {e}")
+        return [], None
 
 def initialize_word_list(words: List[str]):
     collection = get_words_collection()
