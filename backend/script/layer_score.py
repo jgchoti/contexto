@@ -32,26 +32,25 @@ class LayeredScoring:
         return max(0.0, normalized)
     
     def category_match(self, word1, word2):
-        """Layer 3: WordNet category consistency (10%)"""
+        """Layer 3: WordNet category consistency (returns float 0-1)"""
         try:
             synsets1 = wn.synsets(word1)
             synsets2 = wn.synsets(word2)
-            
+
             if not synsets1 or not synsets2:
                 return 0.5  
-            
-            pos1 = set([s.pos() for s in synsets1])
-            pos2 = set([s.pos() for s in synsets2])
-            
-            if pos1 & pos2:
-                return 1.0
-            else:
-                return 0.0
-                
+
+            pos1 = [s.pos() for s in synsets1]
+            pos2 = [s.pos() for s in synsets2]
+
+            # Fraction of POS overlap
+            overlap = len(set(pos1) & set(pos2)) / max(len(set(pos1 + pos2)), 1)
+            return round(float(overlap), 2)  # returns 0.0 to 1.0
+
         except Exception:
-            return 0.5  
+            return 0.5
     
-    def calculate_score(self, guess_word, secret_word, secret_emb=None):
+    def calculate_score(self, guess_word, secret_word, guess_emb=None, secret_emb=None):
         """
         Weights:
         - Semantic: 70%
@@ -59,7 +58,7 @@ class LayeredScoring:
         - Category: 10%
         """
         
-        semantic = self.semantic_similarity(guess_word, secret_word, emb2=secret_emb)
+        semantic = self.semantic_similarity(guess_word, secret_word, emb1=guess_emb, emb2=secret_emb)
         lexical = self.lexical_similarity(guess_word, secret_word)
         category = self.category_match(guess_word, secret_word)
         
@@ -72,7 +71,7 @@ class LayeredScoring:
         
 
         message = self.generate_message(semantic, lexical, category)
-        
+        explanations = self.generate_detailed_reasoning(semantic, lexical, category,guess_word)
         return {
             'score': round(final_score, 4),
             'reasoning': {
@@ -80,6 +79,7 @@ class LayeredScoring:
                 'lexical': round(lexical, 2),
                 'category': round(category, 2)
             },
+            'explanations': explanations,
             'message': message
         }
     
@@ -102,3 +102,74 @@ class LayeredScoring:
             return "Pretty far off in meaning"
         
         return "Getting warmer..."
+    
+    def generate_detailed_reasoning(self, semantic, lexical, category, guess_word):
+        explanations = []
+        if semantic > 0.8:
+            explanations.append({
+            'layer': 'Meaning',
+            'icon': '🧠',
+            'score': semantic,
+            'explanation': f"'{guess_word}' and the secret word have very similar meanings"
+            })
+        elif semantic > 0.6:
+            explanations.append({
+            'layer': 'Meaning',
+            'icon': '🧠',
+            'score': semantic,
+            'explanation': f"'{guess_word}' is somewhat related to the secret word"
+            })
+        else:
+            explanations.append({
+            'layer': 'Meaning',
+            'icon': '🧠',
+            'score': semantic,
+            'explanation': f"'{guess_word}' has a different meaning from the secret word"
+        })
+    
+   
+        if lexical > 0.8:
+            explanations.append({
+            'layer': 'Spelling',
+            'icon': '📝',
+            'score': lexical,
+            'explanation': "The spelling is very similar (maybe plural or different tense?)"
+            })
+        elif lexical > 0.5:
+            explanations.append({
+            'layer': 'Spelling',
+            'icon': '📝',
+            'score': lexical,
+            'explanation': "Some letters match, but spelling is different"
+            })
+        else:
+            explanations.append({
+            'layer': 'Spelling',
+            'icon': '📝',
+            'score': lexical,
+            'explanation': "Completely different spelling"
+        })
+    
+        if category >= 0.8:
+            explanations.append({
+            'layer': 'Word Type',
+            'icon': '📚',
+            'score': category,
+            'explanation': "Mostly same word type (noun, verb, etc.)"
+            })
+        elif category >= 0.3:
+            explanations.append({
+            'layer': 'Word Type',
+            'icon': '📚',
+            'score': category,
+            'explanation': "Some overlap in word type, but not fully clear"
+            })
+        else:
+            explanations.append({
+            'layer': 'Word Type',
+            'icon': '📚',
+            'score': category,
+            'explanation': "Different word types"
+        })
+    
+        return explanations
