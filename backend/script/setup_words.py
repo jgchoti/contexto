@@ -10,9 +10,8 @@ def setup_initial_words():
     print(f"Downloaded {len(words)} words")
     print("Generating embeddings...")
     model = SentenceTransformer('all-MiniLM-L6-v2')
-    embeddings = model.encode(words, convert_to_numpy=True)
     print("Storing in MongoDB...")
-    initialize_word_list(words, embeddings)
+    initialize_word_list(words)
     print("✅ Setup complete!")
 
 if __name__ == "__main__":
