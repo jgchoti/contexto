@@ -65,31 +65,65 @@ class GuessWord:
     def guess(self, word: str) -> Dict:
         word = word.lower().strip()
 
+        if not word:
+            return {
+            'error': True,
+            'message': 'Please enter a word',
+            'word': word
+            }
+    
+        if len(word) < 2:
+            return {
+            'error': True,
+            'message': 'Word must be at least 2 characters',
+            'word': word
+            }
+    
         if word == self.secret_word:
             return {
-                'word': word,
-                'score': 1.0,
-                'rank': 0,
-                'total_words': len(self.reference_words),
-                'reasoning': {'semantic': 1.0, 'lexical': 1.0, 'category': 1.0},
-                'message': f"Correct! The word was '{self.secret_word}'",
-                'won': True
-            }
-
-        score_data = self.scorer.calculate_score(word, self.secret_word, secret_emb=self.secret_emb)
-        guess_score = score_data['score']
-
-        rank = int(np.searchsorted(-self.sorted_scores, -guess_score)) + 1
-
-        return {
             'word': word,
-            'score': guess_score,
-            'rank': rank,
+            'score': 1.0,
+            'rank': 0,
             'total_words': len(self.reference_words),
-            'reasoning': score_data['reasoning'],
-            'explanations': score_data['explanations'],
-            'message': score_data['message'],
-            'won': False
+            'reasoning': {
+                'semantic': 1.0,
+                'lexical': 1.0,
+                'category': 1.0
+            },
+            'explanations': [],
+            'message': f"🎉 Correct! The word was '{self.secret_word}'",
+            'won': True
+            }
+    
+        try:
+            score_data = self.scorer.calculate_score(
+                word, 
+                self.secret_word,
+                secret_emb=self.secret_emb
+                )
+            guess_score = score_data['score']
+        except Exception as e:
+            return {
+            'error': True,
+            'message': f'Unable to process word "{word}". Try another word.',
+            'word': word
+            }
+    
+   
+        rank = np.searchsorted(-self.sorted_scores, -guess_score) + 1
+    
+        in_reference = word in self.reference_words
+    
+        return {
+        'word': word,
+        'score': float(guess_score), 
+        'rank': int(rank), 
+        'total_words': len(self.reference_words),
+        'reasoning': score_data['reasoning'],
+        'explanations': score_data.get('explanations', []),
+        'message': score_data['message'],
+        'won': False,
+        'in_reference': in_reference
         }
 
     def find_similar_words(self, word: str, top_k: int = 10) -> List[Dict]:
