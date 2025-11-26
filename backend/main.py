@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 from backend.game_manager import GameManager
+from backend.script.guess import GuessWord
 from backend.database import load_reference_words
 import os
 
@@ -119,35 +120,42 @@ def make_guess(request: GuessRequest):
 
     
     return result
+@app.get("/hint")
+def get_one_hint(game_id: str):
+    """Returns a strong hint (different each time)"""
+    if game_id not in app_state.game_manager.active_games:
+        raise HTTPException(status_code=404, detail="Game not found")
 
-@app.get("/game/{game_id}/stats", response_model=GameStatsResponse)
-def get_game_stats(game_id: str):
-    """Get statistics for a specific game"""
-    if not app_state.game_manager:
-        raise HTTPException(status_code=503, detail="Game manager not initialized")
+    game_session = app_state.game_manager.active_games[game_id]
+    game: GuessWord = game_session['game']
     
-    stats = app_state.game_manager.get_game_stats(game_id)
+    if 'hints_given' not in game_session:
+        game_session['hints_given'] = []
     
-    if 'error' in stats:
-        raise HTTPException(status_code=404, detail=stats['error'])
+    secret = game.secret_word.lower()
     
-    return stats
+    candidates = game.find_similar_words(secret, top_k=15)
+    
+    # Filter out: secret word + already given hints
+    available_hints = [
+        c for c in candidates 
+        if c["word"].lower() != secret 
+        and c["word"] not in game_session['hints_given']
+    ]
 
-@app.get("/similar/{word}")
-def get_similar_words(word: str, top_k: int = 10):
-    """Find words similar to the given word (hint feature)"""
-    if not app_state.game_manager:
-        raise HTTPException(status_code=503, detail="Game manager not initialized")
+    if not available_hints:
+        raise HTTPException(status_code=400, detail="No more hints available")
 
-    if not app_state.game_manager.active_games:
-        raise HTTPException(status_code=400, detail="No active games. Start a game first.")
-    
-    game_id = list(app_state.game_manager.active_games.keys())[0]
-    game = app_state.game_manager.active_games[game_id]['game']
-    
-    similar_words = game.find_similar_words(word, top_k=top_k)
-    return {"word": word, "similar_words": similar_words}
+    # Return the best available hint
+    best_hint = available_hints[0]
+    game_session['hints_given'].append(best_hint["word"])
 
+    return {
+        "word": best_hint["word"],
+        "similarity": round(best_hint["similarity"], 4),
+        "percent": int(best_hint["similarity"] * 100)
+    }
+    
 @app.delete("/game/{game_id}")
 def delete_game(game_id: str):
     """Delete/end a game session"""
@@ -159,3 +167,16 @@ def delete_game(game_id: str):
         return {"message": f"Game {game_id} deleted"}
     else:
         raise HTTPException(status_code=404, detail="Game not found")
+    
+@app.get("/reveal")
+def reveal_secret(game_id: str):
+    """
+    Reveals the secret word when player gives up
+    """
+    if game_id not in app_state.game_manager.active_games:
+        raise HTTPException(status_code=404, detail="Game not found or already ended")
+
+    game_session = app_state.game_manager.active_games[game_id]
+    secret_word = game_session['game'].secret_word
+
+    return {"secret": secret_word}
