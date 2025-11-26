@@ -70,7 +70,7 @@ def create_app() -> FastAPI:
             "active_games": len(app_state.game_manager.active_games) if app_state.game_manager else 0,
         }
 
-    @app.post("/game/new"))
+    @app.post("/game/new")
     def new_game(mode: str = "practice", difficulty: str = "medium"):
         if not app_state.game_manager:
             raise HTTPException(503, "Game engine not ready yet")
