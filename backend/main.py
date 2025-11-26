@@ -6,7 +6,7 @@ import threading
 from game_manager import GameManager
 from script.guess import GuessWord
 from database import load_reference_words
-
+import os
 class AppState:
     def __init__(self):
         self.game_manager: Optional[GameManager] = None
@@ -45,7 +45,10 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        os.getenv("FRONTEND_URL", "http://localhost:3000"),
+        "https://re-contexto.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
