@@ -4,3 +4,9 @@ backend/script/__pycache__
 backend/script/__pycache__/*
 backend/script/__pycache__/guess.cpython-312.pyc
 .env
+
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
