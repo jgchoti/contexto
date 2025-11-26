@@ -1,6 +1,6 @@
 const API_BASE = import.meta.env.DEV
     ? '/api'
-    : 'https://contexto-l76j.onrender.com/';
+    : 'https://contexto-l76j.onrender.com';
 
 export async function newGame(mode = 'practice', difficulty = 'medium') {
     const res = await fetch(`${API_BASE}/game/new`, {
