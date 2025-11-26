@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { newGame, makeGuess, getGameStats, getSimilarWords } from "./api";
+import confetti from "canvas-confetti";
 import "./App.css";
 
 function App() {
@@ -17,6 +18,57 @@ function App() {
     startNewGame();
     inputRef.current?.focus();
   }, []);
+
+  const triggerConfetti = () => {
+    // Pink & Yellow summer explosion
+    const count = 300;
+    const defaults = {
+      origin: { y: 0.7 },
+      colors: [
+        "#ff6b9d",
+        "#ff9ec1",
+        "#ffd43b",
+        "#ffb84d",
+        "#fff0f6",
+        "#ffe8a3",
+      ],
+      ticks: 200,
+      gravity: 0.8,
+      scalar: 1.2,
+    };
+
+    // Left side burst
+    confetti({
+      ...defaults,
+      particleCount: count / 2,
+      angle: 60,
+      spread: 55,
+      startVelocity: 60,
+      origin: { x: 0, y: 0.6 },
+    });
+
+    // Right side burst
+    confetti({
+      ...defaults,
+      particleCount: count / 2,
+      angle: 120,
+      spread: 55,
+      startVelocity: 60,
+      origin: { x: 1, y: 0.6 },
+    });
+
+    // Final big center explosion
+    setTimeout(() => {
+      confetti({
+        ...defaults,
+        particleCount: count,
+        spread: 80,
+        startVelocity: 80,
+        scalar: 1.5,
+        shapes: ["star", "circle"],
+      });
+    }, 300);
+  };
 
   async function startNewGame() {
     setLoading(true);
@@ -50,7 +102,8 @@ function App() {
       } else {
         setGuesses((prev) => [...prev, result]);
         if (result.won) {
-          setMessage(`🎉 You won in ${result.total_guesses} guesses!`);
+          triggerConfetti();
+          setMessage(`You won in ${result.total_guesses} guesses!`);
         } else {
           setMessage(`#${result.rank} out of ${result.total_words}`);
         }
@@ -228,7 +281,7 @@ function App() {
                     <span className="rank">#{g.rank}</span>
                     <span className="score">{(g.score * 100).toFixed(1)}%</span>
 
-                    {(g.explanations || g.reasoning) && (
+                    {!g.won && (g.explanations || g.reasoning) && (
                       <button
                         className="expand-btn"
                         onClick={() =>
