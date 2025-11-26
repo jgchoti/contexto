@@ -1,7 +1,7 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from typing import List, Dict, Optional
-from backend.script.layer_score import LayeredScoring
+from script.layer_score import LayeredScoring
 import faiss
 
 class GuessWord:
