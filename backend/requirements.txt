@@ -1,6 +1,7 @@
 fastapi==0.121.3
 uvicorn[standard]==0.38.0
 pydantic==2.12.4
+
 torch==2.6.0 --index-url https://download.pytorch.org/whl/cpu
 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu
 transformers==4.35.2
@@ -10,6 +11,5 @@ numpy==2.1.1
 scikit-learn==1.5.2
 pymongo==4.8.0
 python-dotenv==1.0.1
-Levenshtein==0.25.1
 nltk==3.8.1
 rapidfuzz==3.10.0

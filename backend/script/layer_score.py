@@ -1,5 +1,5 @@
 from sentence_transformers import SentenceTransformer
-from Levenshtein import distance as levenshtein_distance
+from rapidfuzz.string_metric import levenshtein as levenshtein_distance
 from nltk.corpus import wordnet as wn
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
