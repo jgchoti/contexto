@@ -4,7 +4,8 @@
 
 A reverse-engineered version of Contexto that showcases semantic search, vector embeddings, and full-stack data engineering.
 
-[![Live Demo](https://img.shields.io/badge/Demo-Live-success)](your-demo-link)
+<!-- [![Live Demo](https://img.shields.io/badge/Demo-Live-success)](your-demo-link) -->
+
 [![Tech Stack](https://img.shields.io/badge/Stack-FastAPI%20%7C%20React%20%7C%20MongoDB-blue)](/)
 
 ---

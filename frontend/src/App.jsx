@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { newGame, makeGuess, getGameStats, getSimilarWords } from "./api";
+import { newGame, makeGuess } from "./api";
 import confetti from "canvas-confetti";
 import "./App.css";
 
