@@ -39,16 +39,24 @@ def lazy_init():
 
 app = FastAPI(
     title="Contexto Unlimited API",
-    description="Pink & yellow summer edition with unlimited hints & confetti",
+    description="Contexto with unlimited hints ",
     version="1.0.0",
 )
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize on server startup instead of first request"""
+    print("🚀 Server starting - initializing game engine...")
+    lazy_init()
+    print("✅ Game engine ready!")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",      
         "http://localhost:5173",     
-        "https://re-contexto.vercel.app"  
+        "https://re-contexto.vercel.app",
+        "https://*.vercel.app"  
     ],
     allow_credentials=True,
     allow_methods=["*"],
