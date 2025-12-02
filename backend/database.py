@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
+from pymongo.server_api import ServerApi
 
 load_dotenv()
 
@@ -15,16 +16,17 @@ if not MONGO_URL:
 
 connection_params = {
     "tls": True,
-    "tlsAllowInvalidCertificates": True,  
+    "tlsAllowInvalidCertificates": True,
     "serverSelectionTimeoutMS": 10000,
     "connectTimeoutMS": 10000,
     "socketTimeoutMS": 20000,
+    "server_api": ServerApi('1')
 }
 
-# for FastAPI
-async_client = AsyncIOMotorClient(MONGO_URL)
+async_client = AsyncIOMotorClient(MONGO_URL, **connection_params)
 async_db = async_client[DB_NAME]
-sync_client = MongoClient(MONGO_URL)
+
+sync_client = MongoClient(MONGO_URL, **connection_params)
 sync_db = sync_client[DB_NAME]
 
 def get_words_collection():
