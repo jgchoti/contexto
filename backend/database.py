@@ -13,6 +13,14 @@ DB_NAME = os.getenv("MONGO_DB_NAME", "contexto_game")
 if not MONGO_URL:
     raise ValueError("MONGO_URL not found in environment variables!")
 
+connection_params = {
+    "tls": True,
+    "tlsAllowInvalidCertificates": True,  
+    "serverSelectionTimeoutMS": 10000,
+    "connectTimeoutMS": 10000,
+    "socketTimeoutMS": 20000,
+}
+
 # for FastAPI
 async_client = AsyncIOMotorClient(MONGO_URL)
 async_db = async_client[DB_NAME]
