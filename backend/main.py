@@ -3,9 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 import threading
-from .game_manager import GameManager
-from .script.guess import GuessWord
-from .database import load_reference_words
+from game_manager import GameManager
+from script.guess import GuessWord
+from database import load_reference_words
 import os
 class AppState:
     def __init__(self):

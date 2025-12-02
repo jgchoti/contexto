@@ -1,6 +1,6 @@
 from sentence_transformers import SentenceTransformer
 import requests
-from ..database import initialize_word_list
+from database import initialize_word_list
 
 def setup_initial_words():
     url = "https://raw.githubusercontent.com/first20hours/google-10000-english/master/google-10000-english-usa-no-swears.txt"

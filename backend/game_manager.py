@@ -3,8 +3,8 @@ import uuid
 from datetime import datetime, date
 from typing import List, Dict
 import numpy as np
-from .script.guess import GuessWord
-from .script.layer_score import LayeredScoring
+from script.guess import GuessWord
+from script.layer_score import LayeredScoring
 
 class GameManager:
     def __init__(self, reference_words: List[str], reference_embeddings: np.ndarray):
