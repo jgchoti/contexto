@@ -6,7 +6,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 class LayeredScoring:
     def __init__(self):
-        self.model = SentenceTransformer('all-MiniLM-L6-v2')
+        self.model = SentenceTransformer('paraphrase-MiniLM-L3-v2')
+        # self.model = SentenceTransformer('all-MiniLM-L6-v2')
         
     def semantic_similarity(self, word1, word2, emb1=None, emb2=None):
         if emb1 is None:
