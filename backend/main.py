@@ -43,12 +43,12 @@ app = FastAPI(
     version="1.0.0",
 )
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize on server startup instead of first request"""
-    print("🚀 Server starting - initializing game engine...")
-    lazy_init()
-    print("✅ Game engine ready!")
+# @app.on_event("startup")
+# async def startup_event():
+#     """Initialize on server startup instead of first request"""
+#     print("🚀 Server starting - initializing game engine...")
+#     lazy_init()
+#     print("✅ Game engine ready!")
 
 app.add_middleware(
     CORSMiddleware,
